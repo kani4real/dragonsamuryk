@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mythical Creatures: Kazakh & English Folklore</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --bg: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text: #1F2937;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            text-align: center;
+            color: var(--primary);
+        }
+        
+        /* Screen 1: Card List */
+        .cards-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            width: 260px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            border-top: 5px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-image-container {
+            width: 100%;
+            height: 180px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #E5E7EB;
+        }
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid #E5E7EB;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .creature-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .country-badge {
+            font-size: 0.75rem;
+            background: #E5E7EB;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+        .details-btn {
+            margin-top: 15px;
+            background: #E5E7EB;
+            color: var(--text);
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .details-btn:hover {
+            background: #D1D5DB;
+        }
+
+        /* Screen 2: Card Details (Modal) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #9CA3AF;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        .modal-desc {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #4B5563;
+            margin: 20px 0;
+            padding: 15px;
+            background: #F9FAFB;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* Screen 3: Battle Mode */
+        .battle-arena {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .battle-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        select {
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            width: 200px;
+        }
+        .vs {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #9CA3AF;
+        }
+        .battle-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .battle-btn:hover {
+            background: #4338CA;
+        }
+        #battle-result {
+            margin-top: 20px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            min-height: 30px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        /* Stats styles */
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .stat-label { color: #6B7280; }
+        .stat-value { font-weight: 600; }
+        .danger-bar-container { background: #E5E7EB; border-radius: 999px; height: 8px; margin-top: 5px; overflow: hidden; }
+        .danger-bar { background: #EF4444; height: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Mythical Creatures Compendium</h1>
+    
+    <!-- Screen 1: Card list -->
+    <div class="cards-grid" id="cards-container"></div>
+
+    <!-- Screen 3: Battle Mode -->
+    <div class="battle-arena">
+        <h2>⚔️ Battle Mode</h2>
+        <p>Choose two creatures to compare their Danger stats.</p>
+        
+        <div class="battle-controls">
+            <select id="fighter1"></select>
+            <span class="vs">VS</span>
+            <select id="fighter2"></select>
+        </div>
+        
+        <button class="battle-btn" onclick="calculateBattle()">Compare Danger</button>
+        
+        <div id="battle-result"></div>
+    </div>
+</div>
+
+<!-- Screen 2: Card Details (Modal Overlay) -->
+<div class="modal-overlay" id="details-modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">×</button>
+        <div id="modal-body">
+            <!-- Сюда подставится информация о карте -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // База данных с добавленными описаниями из вашей работы
+    const database = [
+        { name: "Dragon", country: "England", power: "Fire breath", element: "Fire", danger: 8, image: "https://images.photowall.com/products/57308/dragon-on-the-rock.jpg?h=699&q=85", desc: "A huge reptile with wings, sharp claws and the power to breathe fire. It usually guards piles of gold and treasure." },
+        { name: "Aidakhar", country: "Kazakhstan", power: "Storm and rain", element: "Water", danger: 9, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFR-dZavvgp9s2iZs2836qP2g6rOnbmzZ25w67L8Yxxc8SVJyYkbBZTRg&s=10", desc: "A flying dragon-like serpent connected with water, rain and storms. It threatens the sun and fights the sacred bird Samuryk." },
+        { name: "Griffin", country: "England", power: "Flight and strength", element: "Air/Earth", danger: 6, image: "https://static.wikia.nocookie.net/harrypotter/images/9/96/Griffin_FBC.png/revision/latest?cb=20170413064633", desc: "A legendary creature with the body of a lion and the head and wings of an eagle. A symbol of courage and strength." },
+        { name: "Samuryk", country: "Kazakhstan", power: "Protects the sun", element: "Air/Sun", danger: 5, image: "https://avatars.mds.yandex.net/i?id=757930734c63de4d9d826fa4aebe3cbddbefca19-4551606-images-thumbs&n=13", desc: "A giant, magical bird that lives on the World Tree Baiterek and protects the golden egg of the sun." },
+        { name: "Fairy", country: "England", power: "Small magic tricks", element: "Nature", danger: 3, image: "https://i.pinimg.com/474x/a9/c5/2b/a9c52ba3b6e9034a99f2a49702409f5a.jpg", desc: "Small, magical beings that live in forests, gardens or under hills. Connected with nature and moonlight." },
+        { name: "Peri", country: "Kazakhstan", power: "Flight and charm", element: "Sky/Wind", danger: 6, image: "https://avatars.mds.yandex.net/i?id=a16dc495ee2008e03fbc6a120fd64fbe9e957be9-4467639-images-thumbs&n=13", desc: "A beautiful, winged, magical spirit connected with the sky and wind. Can help or test human heroes." }
+    ];
+
+    const cardsContainer = document.getElementById('cards-container');
+    const fighter1Select = document.getElementById('fighter1');
+    const fighter2Select = document.getElementById('fighter2');
+    const modal = document.getElementById('details-modal');
+    const modalBody = document.getElementById('modal-body');
+
+    // Отрисовка Screen 1 (Списка карт)
+    database.forEach((creature, index) => {
+        const cardHTML = `
+            <div class="card">
+                <div class="card-image-container">
+                    <img src="${creature.image}" alt="${creature.name}" class="card-image">
+                </div>
+                <div class="card-header">
+                    <h3 class="creature-name">${creature.name}</h3>
+                    <span class="country-badge">${creature.country}</span>
+                </div>
+                <button class="details-btn" onclick="openModal(${index})">View Details</button>
+            </div>
+        `;
+        cardsContainer.innerHTML += cardHTML;
+
+        // Заполнение выпадающих списков для битвы
+        fighter1Select.innerHTML += `<option value="${index}">${creature.name} (${creature.country})</option>`;
+        const selected = index === 1 ? 'selected' : '';
+        fighter2Select.innerHTML += `<option value="${index}" ${selected}>${creature.name} (${creature.country})</option>`;
+    });
+
+    // Функция для Screen 2 (Детали)
+    function openModal(index) {
+        const creature = database[index];
+        modalBody.innerHTML = `
+            <div class="card-image-container" style="height: 150px;">
+                <img src="${creature.image}" class="card-image">
+            </div>
+            <h2>${creature.name}</h2>
+            <span class="country-badge">${creature.country}</span>
+            <div class="modal-desc">" ${creature.desc} "</div>
+            <div class="stat-row"><span class="stat-label">Power:</span><span class="stat-value">${creature.power}</span></div>
+            <div class="stat-row"><span class="stat-label">Element:</span><span class="stat-value">${creature.element}</span></div>
+            <div class="stat-row"><span class="stat-label">Danger Level:</span><span class="stat-value">${creature.danger}/10</span></div>
+            <div class="danger-bar-container"><div class="danger-bar" style="width: ${creature.danger * 10}%;"></div></div>
+        `;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    // Закрытие модального окна при клике вне его
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // Функция для Screen 3 (Битва)
+    function calculateBattle() {
+        const c1Index = fighter1Select.value;
+        const c2Index = fighter2Select.value;
+        const resultDiv = document.getElementById('battle-result');
+
+        if (c1Index === c2Index) {
+            resultDiv.style.backgroundColor = "#F3F4F6";
+            resultDiv.style.color = "#4B5563";
+            resultDiv.innerText = "It's a draw! You selected the same creature.";
+            return;
+        }
+
+        const creature1 = database[c1Index];
+        const creature2 = database[c2Index];
+
+        resultDiv.style.backgroundColor = "#ECFDF5";
+        resultDiv.style.color = "#065F46";
+
+        if (creature1.danger > creature2.danger) {
+            resultDiv.innerText = `🏆 ${creature1.name} wins! (${creature1.danger} vs ${creature2.danger})`;
+        } else if (creature2.danger > creature1.danger) {
+            resultDiv.innerText = `🏆 ${creature2.name} wins! (${creature2.danger} vs ${creature1.danger})`;
+        } else {
+            resultDiv.style.backgroundColor = "#FFFBEB";
+            resultDiv.style.color = "#92400E";
+            resultDiv.innerText = `🤝 It's a tie! Both have a danger level of ${creature1.danger}.`;
+        }
+    }
+</script>
+</body>
+</html>
